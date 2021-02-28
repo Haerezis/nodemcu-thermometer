@@ -23,6 +23,9 @@ struct Configuration {
 
   float temperature_bias;
   float humidity_bias;
+
+  //unit : seconds
+  uint32_t sleep_duration;
 };
 
 #endif

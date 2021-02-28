@@ -59,6 +59,8 @@ void Configuration::load_from_flash() {
   this->temperature_bias = doc["temperature_bias"];
   this->humidity_bias = doc["humidity_bias"];
 
+  this->sleep_duration = doc["sleep_duration"];
+
   this->load_successful = true;
 
   config_file.close();
@@ -80,6 +82,8 @@ String Configuration::to_json() {
 
   doc["temperature_bias"] = this->temperature_bias;
   doc["humidity_bias"] = this->humidity_bias;
+
+  doc["sleep_duration"] = this->sleep_duration;
 
   serializeJson(doc, retval);
 

@@ -70,12 +70,14 @@ void run_config_mode(Screen & screen, Configuration & conf) {
   WiFiManagerParameter param_mqtt_topic("mqtt_topic", "MQTT topic", conf.mqtt_topic.c_str(), 256);
   WiFiManagerParameter param_temperature_bias("temperature_bias", "Temperature bias (float)", String(conf.temperature_bias).c_str(), 256);
   WiFiManagerParameter param_humidity_bias("humidity_bias", "Humidity bias (float)", String(conf.temperature_bias).c_str(), 256);
+  WiFiManagerParameter param_sleep_duration("sleep_duration", "Sleep duration between 2 readings (in seconds)", String(conf.sleep_duration).c_str(), 256);
 
   wm.addParameter(&param_mqtt_ip);
   wm.addParameter(&param_mqtt_port);
   wm.addParameter(&param_mqtt_topic);
   wm.addParameter(&param_temperature_bias);
   wm.addParameter(&param_humidity_bias);
+  wm.addParameter(&param_sleep_duration);
 
   wm.setSTAStaticIPConfig(
     IPAddressFromString(conf.local_ip),
@@ -94,12 +96,16 @@ void run_config_mode(Screen & screen, Configuration & conf) {
   conf.local_gateway = WiFi.gatewayIP().toString();
   conf.temperature_bias = String(param_temperature_bias.getValue()).toFloat();
   conf.humidity_bias = String(param_humidity_bias.getValue()).toFloat();
+  conf.sleep_duration = String(param_sleep_duration.getValue()).toInt();
+
 
   if(!conf.save_to_flash()) {
     run_error_mode(screen, conf, ERROR__CONF__SAVE_FAILURE, "Conf save failed");
-    return;
   }
-  
+
+
+  //In success, display success on screen, and go into deep sleep indefinitevely.
+  // => Waiting for the device to change mode (to normal mode) AND be manually rebooted
   screen.display_config_mode_success();
   ESP.deepSleep(0);
 }
@@ -109,7 +115,7 @@ void run_config_mode(Screen & screen, Configuration & conf) {
 // NORMAL MODE
 /////////////////////////////////////////////////////////
 
-void run_normal_mode(Screen & screen, Configuration & conf) {
+void run_normal_mode(Screen & screen, SensorData & sensor, Configuration & conf) {
   //TODO
   /*
    * if config not loaded => run_error_mode
