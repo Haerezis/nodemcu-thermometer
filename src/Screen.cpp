@@ -268,7 +268,7 @@ void Screen::display_config_mode_success() {
 
 
 
-void Screen::display_error(uint8_t code, const String & msg) {
+void Screen::display_error(uint16_t code, const String & msg) {
   display.clearDisplay();
   
   draw_title("ERROR");

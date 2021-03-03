@@ -21,7 +21,7 @@ bool send_data_to_mqtt(Configuration & conf, SensorData & data);
 
 void run_config_mode(Screen & screen, Configuration & conf);
 void run_normal_mode(Screen & screen, SensorData & sensor, Configuration & conf);
-void run_error_mode(Screen & screen, Configuration & conf, uint8_t code, const String & msg = "");
+void run_error_mode(Screen & screen, Configuration & conf, uint16_t code, const String & msg = "");
 
 
 #endif

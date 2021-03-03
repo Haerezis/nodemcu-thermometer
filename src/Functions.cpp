@@ -38,13 +38,13 @@ int connect_to_wifi(Configuration & conf, WiFiManager & wm) {
   return retval;
 }
 
-bool send_data_to_mqtt(Configuration & conf, SensorData & data) {
+bool send_data_to_mqtt(Configuration & conf, SensorData & sensor) {
   bool retval = true;
   WiFiClient wifi_client;
   PubSubClient mqtt_client(conf.mqtt_ip.c_str(), conf.mqtt_port.toInt(), NULL, wifi_client);
 
   mqtt_client.connect(WiFi.macAddress().c_str());//Use chip MAC address as client ID (should be unique for each chip)
-  retval = mqtt_client.publish(conf.mqtt_topic.c_str(), data.to_json().c_str());
+  retval = mqtt_client.publish(conf.mqtt_topic.c_str(), sensor.to_json().c_str());
 
   return retval;
 }
@@ -101,6 +101,7 @@ void run_config_mode(Screen & screen, Configuration & conf) {
 
   if(!conf.save_to_flash()) {
     run_error_mode(screen, conf, ERROR__CONF__SAVE_FAILURE, "Conf save failed");
+    return;
   }
 
 
@@ -116,17 +117,32 @@ void run_config_mode(Screen & screen, Configuration & conf) {
 /////////////////////////////////////////////////////////
 
 void run_normal_mode(Screen & screen, SensorData & sensor, Configuration & conf) {
-  //TODO
-  /*
-   * if config not loaded => run_error_mode
-   * else
-   *   connect wifi
-   *   read temp
-   *   send mqtt
-   *   update display
-   *   sleep
-   */
-   //ESP.deepsleep(15 * 60 * 1000000);
+  if (!conf.load_successful) {
+    run_error_mode(screen, conf, ERROR__CONF__LOAD_FAILURE, "Conf load failed");
+    return;
+  }
+
+   WiFiManager wm;
+
+  int wifi_retval = connect_to_wifi(conf, wm);
+  if (wifi_retval != 0) {
+    run_error_mode(screen, conf, wifi_retval, "Wifi con. failed");
+    return;
+  }
+
+  sensor.update_temperature_and_humidify();
+  sensor.update_battery_level();
+
+  bool mqtt_retval = send_data_to_mqtt(conf, sensor);
+  if(!mqtt_retval) {
+    run_error_mode(screen, conf, ERROR__MQTT__FAILURE_TO_SEND, "MQTT send failed");
+    return;
+  }
+
+  screen.display_normal_mode(sensor);
+
+  //conf.sleep_duration is in seconds, but ESP.deepSleep expects microseconds
+  ESP.deepSleep(conf.sleep_duration * 1000000);
 }
 
 
@@ -134,7 +150,7 @@ void run_normal_mode(Screen & screen, SensorData & sensor, Configuration & conf)
 // ERROR MODE
 /////////////////////////////////////////////////////////
 
-void run_error_mode(Screen & screen, Configuration & conf, uint8_t code, const String & msg) {
+void run_error_mode(Screen & screen, Configuration & conf, uint16_t code, const String & msg) {
   screen.display_error(code, msg);
   ESP.deepSleep(0);
 }

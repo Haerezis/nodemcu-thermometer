@@ -22,7 +22,7 @@ public:
   void display_normal_mode(const SensorData & data);
   void display_config_mode_infos(const String & ssid,const String & password);
   void display_config_mode_success();
-  void display_error(uint8_t code, const String & msg = "");
+  void display_error(uint16_t code, const String & msg = "");
   
 
 protected:
