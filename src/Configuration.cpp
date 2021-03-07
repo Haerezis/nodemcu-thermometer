@@ -4,7 +4,14 @@
 #include <ArduinoJson.h>
 #include <HardwareSerial.h>
 
-Configuration::Configuration() : file_path("/config.json"), load_successful(false), mqtt_port("1883") {
+Configuration::Configuration() :
+  file_path("/config.json"),
+  load_successful(false),
+  mqtt_port("1883"),
+  temperature_bias(0.0f),
+  humidity_bias(0.0f),
+  sleep_duration(0) 
+{
 }
 
 bool Configuration::save_to_flash() {
@@ -30,7 +37,7 @@ void Configuration::load_from_flash() {
 
   File config_file = LittleFS.open(this->file_path, "r");
   if (!config_file) {
-    Serial.println("failed to open config file for writing");
+    Serial.println("failed to open config file for reading");
     this->load_successful = false;
     return;
   }

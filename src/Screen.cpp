@@ -259,9 +259,9 @@ void Screen::display_config_mode_success() {
   display.setTextWrap(false);
   display.setTextColor(BLACK, WHITE);
 
-  display.println("Switch to normal");
-  display.println("mode, and reboot");
-  display.println("device.");
+  display.println("Switch to mode");
+  display.println("normal, and");
+  display.println("reboot device.");
 
   display.display();
 }

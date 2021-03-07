@@ -59,6 +59,7 @@ bool send_data_to_mqtt(Configuration & conf, SensorData & sensor) {
 /////////////////////////////////////////////////////////
 
 void run_config_mode(Screen & screen, Configuration & conf) {
+
   String ap_ssid = String("AP_") + String(RANDOM_REG32);
   String ap_password = String(RANDOM_REG32);
   WiFiManager wm;
@@ -104,10 +105,10 @@ void run_config_mode(Screen & screen, Configuration & conf) {
     return;
   }
 
-
+  screen.display_config_mode_success();
+  
   //In success, display success on screen, and go into deep sleep indefinitevely.
   // => Waiting for the device to change mode (to normal mode) AND be manually rebooted
-  screen.display_config_mode_success();
   ESP.deepSleep(0);
 }
 
